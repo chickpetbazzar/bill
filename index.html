@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Goal & Googly Turf - Bill Generator</title>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #e9efe9; font-family: 'Barlow', sans-serif; color: #111; }
+  .toolbar { max-width: 794px; margin: 12px auto; display: flex; flex-wrap: wrap; gap: 8px; padding: 0 8px; }
+  .toolbar button { flex: 1 1 140px; min-height: 44px; border: 0; border-radius: 6px; font: 600 15px 'Barlow', sans-serif; cursor: pointer; color: #fff; background: #0a3d1d; }
+  .toolbar button.red { background: #c8102e; }
+  .toolbar button.gray { background: #555; }
+
+  .bill { width: 794px; max-width: 100%; margin: 0 auto 24px; background: #fff; border: 3px solid #0a3d1d; display: flex; flex-direction: column; }
+  .head { background: #0a3d1d; color: #fff; padding: 18px 28px 12px; border-bottom: 6px solid #c8102e; }
+  .head-top { display: flex; align-items: center; gap: 16px; }
+  .logo { width: 64px; height: 64px; border-radius: 50%; background: #c8102e; border: 4px solid #fff; display: flex; align-items: center; justify-content: center; font: 36px 'Anton', sans-serif; flex-shrink: 0; }
+  .brand { flex: 1; }
+  .brand h1 { margin: 0; font: 40px/1 'Anton', sans-serif; letter-spacing: 1.5px; text-transform: uppercase; }
+  .brand h1 .r { color: #ff4d5e; } .brand h1 .g { color: #5fe08a; }
+  .brand p { margin: 3px 0 0; font-size: 13px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: #cfeedb; }
+  .tag { font: 26px 'Anton', sans-serif; letter-spacing: 3px; border: 2px solid #fff; padding: 6px 14px; }
+  .addr { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 6px 20px; font-size: 13px; font-weight: 500; margin-top: 10px; padding-top: 6px; border-top: 1px solid rgba(255,255,255,.35); }
+
+  .meta { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 28px; padding: 14px 28px 0; font-size: 14px; }
+  .field { display: flex; align-items: flex-end; gap: 8px; }
+  .field b { white-space: nowrap; }
+  input, select { font: 500 14px 'Barlow', sans-serif; color: #111; }
+  .field input, .field select { flex: 1; min-width: 0; border: 0; border-bottom: 1px solid #555; padding: 2px 2px; background: transparent; border-radius: 0; }
+  input:focus, select:focus { outline: 2px solid #5fe08a; background: #f3fff6; }
+
+  .tbl-wrap { padding: 14px 28px 0; overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { background: #0a3d1d; color: #fff; padding: 7px 4px; border: 1px solid #0a3d1d; }
+  td { border: 1px solid #777; padding: 0; height: 32px; }
+  td input { width: 100%; height: 100%; border: 0; padding: 4px 6px; background: transparent; }
+  td.sn { text-align: center; width: 40px; }
+  td.del { width: 34px; text-align: center; }
+  td.del button { border: 0; background: none; color: #c8102e; font-size: 18px; cursor: pointer; }
+  .num { text-align: right; }
+
+  .bottom { display: flex; flex-wrap: wrap; gap: 20px; padding: 12px 28px 0; align-items: stretch; }
+  .pay { flex: 1 1 220px; display: flex; flex-direction: column; justify-content: space-between; gap: 10px; font-size: 13px; }
+  .pay label { margin-right: 14px; white-space: nowrap; }
+  .totals { width: 290px; max-width: 100%; border: 1px solid #777; font-size: 14px; }
+  .totals .row { display: flex; justify-content: space-between; align-items: center; padding: 6px 10px; border-bottom: 1px solid #aaa; }
+  .totals .row input { width: 110px; text-align: right; border: 0; border-bottom: 1px solid #999; background: transparent; }
+  .totals .row.last { background: #0a3d1d; color: #fff; font-weight: 700; font-size: 15px; border: 0; }
+
+  .norefund { margin: 14px 28px 0; background: #c8102e; color: #fff; padding: 9px 14px; text-align: center; }
+  .norefund .big { font: 24px/1.1 'Anton', sans-serif; letter-spacing: 3px; }
+  .norefund .sm { font-size: 12.5px; font-weight: 600; }
+
+  .rules { padding: 12px 28px 0; }
+  .rules h2 { margin: 0 0 6px; font: 17px 'Anton', sans-serif; letter-spacing: 2px; text-transform: uppercase; color: #0a3d1d; border-bottom: 2px solid #0a3d1d; padding-bottom: 3px; }
+  .rules ol { margin: 0; padding: 0; list-style: none; columns: 2; column-gap: 26px; font-size: 11.5px; line-height: 1.38; }
+  .rules li { margin-bottom: 4px; break-inside: avoid; }
+
+  .foot { margin-top: 10px; padding: 10px 28px 14px; display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; border-top: 2px solid #0a3d1d; }
+  .foot .ty { font: 15px 'Anton', sans-serif; letter-spacing: 1.5px; color: #c8102e; }
+  .foot small { font-size: 11.5px; color: #333; }
+  .sign { width: 180px; border-top: 1px solid #555; text-align: center; font-size: 11.5px; padding-top: 3px; }
+
+  @media (max-width: 640px) {
+    .meta { grid-template-columns: 1fr; }
+    .brand h1 { font-size: 28px; }
+    .tag { display: none; }
+    .rules ol { columns: 1; }
+  }
+  @media print {
+    @page { size: A4; margin: 6mm; }
+    body { background: #fff; }
+    .toolbar, td.del, th.del { display: none !important; }
+    .bill { width: 100%; margin: 0; }
+    * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    input, select { border-color: #555; }
+    input:focus { outline: none; background: transparent; }
+  }
+</style>
+</head>
+<body>
+
+<div class="toolbar">
+  <button onclick="addRow()">+ Add Row</button>
+  <button class="red" onclick="window.print()">Print / Save PDF</button>
+  <button class="gray" onclick="newBill()">New Bill</button>
+</div>
+
+<div class="bill" id="bill">
+  <div class="head">
+    <div class="head-top">
+      <div class="logo">G</div>
+      <div class="brand">
+        <h1>Goal <span class="r">&amp;</span> Googly <span class="g">Turf</span></h1>
+        <p>Play Hard. Train Smart. Win Together.</p>
+      </div>
+      <div class="tag">BILL</div>
+    </div>
+    <div class="addr">
+      <div>Royal City, Alasanatham Road, Near Iscon Temple, Hosur.</div>
+      <div style="font-weight:700">Ph: 9994946766 / 9986962344</div>
+    </div>
+  </div>
+
+  <div class="meta">
+    <div class="field"><b>Bill No:</b><input id="billNo"></div>
+    <div class="field"><b>Date:</b><input type="date" id="billDate"></div>
+    <div class="field"><b>Customer Name:</b><input id="custName" placeholder="Name"></div>
+    <div class="field"><b>Mobile No:</b><input id="custMobile" type="tel" inputmode="numeric" maxlength="10" placeholder="10-digit number"></div>
+    <div class="field"><b>Sport:</b>
+      <select id="sport"><option>Cricket</option><option>Football</option><option>Other</option></select>
+    </div>
+    <div class="field"><b>Booked Slot:</b><input id="slot" placeholder="e.g. 6 PM - 8 PM"></div>
+  </div>
+
+  <div class="tbl-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th style="width:40px">S.No</th>
+          <th>Description (Sport / Ground)</th>
+          <th style="width:100px">From</th>
+          <th style="width:100px">To</th>
+          <th style="width:56px">Hrs</th>
+          <th style="width:80px">Rate (₹)</th>
+          <th style="width:96px">Amount (₹)</th>
+          <th class="del" style="width:34px"></th>
+        </tr>
+      </thead>
+      <tbody id="rows"></tbody>
+    </table>
+  </div>
+
+  <div class="bottom">
+    <div class="pay">
+      <div>
+        <b>Payment Mode</b><br>
+        <label><input type="radio" name="mode" value="Cash" checked> Cash</label>
+        <label><input type="radio" name="mode" value="UPI"> UPI</label>
+        <label><input type="radio" name="mode" value="Card"> Card</label>
+      </div>
+      <div class="field"><b>Received By:</b><input id="recvBy"></div>
+    </div>
+    <div class="totals">
+      <div class="row"><span>Sub Total</span><span>₹ <span id="sub">0.00</span></span></div>
+      <div class="row"><span>Advance Paid</span><span>₹ <input id="adv" type="number" min="0" step="any" value="0"></span></div>
+      <div class="row last"><span>Balance Due</span><span>₹ <span id="bal">0.00</span></span></div>
+    </div>
+  </div>
+
+  <div class="norefund">
+    <div class="big">NO REFUND</div>
+    <div class="sm">Booking and advance amounts are strictly non-refundable and non-transferable, in any situation.</div>
+  </div>
+
+  <div class="rules">
+    <h2>Rules &amp; Regulations</h2>
+    <ol>
+      <li><b>1. No Refund.</b> No refund for cancellation, no-show, rain, power cut or any other reason.</li>
+      <li><b>2. Rescheduling.</b> Only once, with 24 hours prior notice and subject to slot availability.</li>
+      <li><b>3. Timing.</b> Play only in your booked slot. Late arrival does not extend the slot; overtime is charged extra.</li>
+      <li><b>4. Footwear.</b> Only turf or non-marking sports shoes. Metal spikes and bare feet are not allowed.</li>
+      <li><b>5. Players.</b> Do not exceed the number of players booked. Extra players are charged extra.</li>
+      <li><b>6. Clean turf.</b> No food, gutka, chewing gum or spitting on the turf. Water in bottles only.</li>
+      <li><b>7. Safe play.</b> Minors must be supervised by an adult. Warm up properly before playing.</li>
+      <li><b>8. No smoking / alcohol.</b> Smoking, alcohol, tobacco and drugs are strictly prohibited on the premises.</li>
+      <li><b>9. Damage.</b> Any damage to turf, nets, goal posts, lights or property will be charged to the customer.</li>
+      <li><b>10. Own risk.</b> Play at your own risk. Management is not responsible for injuries, accidents or lost belongings.</li>
+      <li><b>11. Behaviour.</b> Fighting, abusive language or misconduct will lead to removal without refund.</li>
+      <li><b>12. Bill.</b> Keep this bill safe and show it at entry. Slot is confirmed only after payment of advance.</li>
+      <li><b>13. Equipment.</b> Rented equipment must be returned in good condition after the game.</li>
+      <li><b>14. Final say.</b> Management decision is final. Disputes are subject to Hosur jurisdiction.</li>
+    </ol>
+  </div>
+
+  <div class="foot">
+    <div>
+      <div class="ty">THANK YOU! VISIT AGAIN</div>
+      <small>Bookings: 9994946766 / 9986962344</small>
+    </div>
+    <div class="sign">Authorised Signature</div>
+  </div>
+</div>
+
+<script>
+  var KEY = 'ggt_bill_counter';
+
+  function nextBillNo() {
+    var n = 1;
+    try { n = (parseInt(localStorage.getItem(KEY), 10) || 0) + 1; } catch (e) {}
+    return 'GGT-' + String(n).padStart(4, '0');
+  }
+  function commitBillNo() {
+    try {
+      var n = (parseInt(localStorage.getItem(KEY), 10) || 0) + 1;
+      localStorage.setItem(KEY, n);
+    } catch (e) {}
+  }
+  function today() {
+    var d = new Date();
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  }
+
+  function addRow() {
+    var tb = document.getElementById('rows');
+    var tr = document.createElement('tr');
+    tr.innerHTML =
+      '<td class="sn"></td>' +
+      '<td><input class="desc" placeholder="e.g. Cricket - Turf 1"></td>' +
+      '<td><input class="from" type="time"></td>' +
+      '<td><input class="to" type="time"></td>' +
+      '<td><input class="hrs num" type="number" min="0" step="any"></td>' +
+      '<td><input class="rate num" type="number" min="0" step="any"></td>' +
+      '<td><input class="amt num" readonly></td>' +
+      '<td class="del"><button type="button" title="Remove row">&times;</button></td>';
+    tb.appendChild(tr);
+    tr.querySelector('.from').addEventListener('input', function () { timeToHours(tr); calc(); });
+    tr.querySelector('.to').addEventListener('input', function () { timeToHours(tr); calc(); });
+    tr.querySelector('.hrs').addEventListener('input', calc);
+    tr.querySelector('.rate').addEventListener('input', calc);
+    tr.querySelector('button').addEventListener('click', function () { tr.remove(); renumber(); calc(); });
+    renumber();
+  }
+
+  function renumber() {
+    var rows = document.querySelectorAll('#rows tr');
+    for (var i = 0; i < rows.length; i++) rows[i].querySelector('.sn').textContent = i + 1;
+  }
+
+  function toMin(v) { var p = v.split(':'); return parseInt(p[0], 10) * 60 + parseInt(p[1], 10); }
+
+  function timeToHours(tr) {
+    var f = tr.querySelector('.from').value, t = tr.querySelector('.to').value;
+    if (!f || !t) return;
+    var diff = toMin(t) - toMin(f);
+    if (diff <= 0) diff += 24 * 60;   // slot passes midnight
+    tr.querySelector('.hrs').value = Math.round(diff / 60 * 100) / 100;
+  }
+
+  function calc() {
+    var sub = 0;
+    document.querySelectorAll('#rows tr').forEach(function (tr) {
+      var h = parseFloat(tr.querySelector('.hrs').value) || 0;
+      var r = parseFloat(tr.querySelector('.rate').value) || 0;
+      var a = h * r;
+      tr.querySelector('.amt').value = a ? a.toFixed(2) : '';
+      sub += a;
+    });
+    var adv = parseFloat(document.getElementById('adv').value) || 0;
+    document.getElementById('sub').textContent = sub.toFixed(2);
+    document.getElementById('bal').textContent = (sub - adv).toFixed(2);
+  }
+
+  function newBill() {
+    if (!confirm('Start a new bill? Current details will be cleared.')) return;
+    commitBillNo();
+    resetForm();
+  }
+
+  function resetForm() {
+    document.getElementById('billNo').value = nextBillNo();
+    document.getElementById('billDate').value = today();
+    ['custName', 'custMobile', 'slot', 'recvBy'].forEach(function (id) { document.getElementById(id).value = ''; });
+    document.getElementById('sport').selectedIndex = 0;
+    document.getElementById('adv').value = 0;
+    document.querySelector('input[name="mode"][value="Cash"]').checked = true;
+    document.getElementById('rows').innerHTML = '';
+    for (var i = 0; i < 4; i++) addRow();
+    calc();
+  }
+
+  document.getElementById('adv').addEventListener('input', calc);
+  resetForm();
+</script>
+</body>
+</html>
